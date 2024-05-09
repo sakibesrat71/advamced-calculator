@@ -8,7 +8,12 @@ function subtract(a, b) {
 // helloworld
 function multiply(a, b) {
   return a * b;
+  
+    
 }
+
+console.log(multiply(2,2))
+// helllo
 
 function divide(a, b) {
   if (b === 0) {
