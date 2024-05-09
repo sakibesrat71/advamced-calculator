@@ -1,6 +1,12 @@
 name: CI Workflow
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   unit_tests:
@@ -12,15 +18,15 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install
-      run: npm ci
-    - name: Run Unit Tests
-      run: npm run test:unit 
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm install
+        run: npm ci
+      - name: Run Unit Tests
+        run: npm run test:unit
 
   integration_tests:
     name: Run Integration Tests
@@ -32,12 +38,33 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install
-      run: npm ci
-    - name: Run Integration Tests
-      run: npm run test:integration 
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm install
+        run: npm ci
+      - name: Run Integration Tests
+        run: npm run test:integration
+
+  merge_to_main:
+    name: Merge to Main
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]'
+    needs: integration_tests
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Merge main with branch
+        run: git merge ${{ github.ref }}
+        continue-on-error: true
+      - name: Push changes
+        run: |
+          git push origin main
+          exit 1  # This will cause the workflow to fail if it reaches this point
+
+# Add more jobs as needed
