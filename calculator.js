@@ -11,6 +11,8 @@ function multiply(a, b) {
   
     
 }
+
+console.log(multiply(2,2))
 // helllo
 
 function divide(a, b) {
